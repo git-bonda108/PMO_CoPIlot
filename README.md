@@ -1,6 +1,8 @@
-# 🚀 PMO CoPilot
+# 🚀 PMO Agentic Copilot
 
-**AI-First Project Management Assistant** built with OpenAI Agents SDK
+**An AI-first PMO platform with 13 specialized agents that automate reporting, predict risks, and deliver executive insights in seconds.**
+
+Built with OpenAI Agents SDK
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B.svg)](https://streamlit.io/)

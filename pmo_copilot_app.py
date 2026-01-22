@@ -1,6 +1,6 @@
 # pmo_copilot_app.py
 """
-PMO CoPilot - AI-First Project Management Assistant
+PMO Agentic Copilot - AI-First Project Management Assistant
 Enhanced Streamlit UI with Multi-Agent Support
 """
 
@@ -55,7 +55,7 @@ else:
 
 # Page config
 st.set_page_config(
-    page_title="PMO CoPilot - AI-First Project Management",
+    page_title="PMO Agentic Copilot - AI-First Project Management",
     page_icon="🚀",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -932,7 +932,7 @@ with st.sidebar:
     st.markdown("""
     <div style='text-align: center; padding: 1rem 0;'>
         <div style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀</div>
-        <div style='font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #00c9ff 0%, #5ee7df 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>PMO CoPilot</div>
+        <div style='font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #00c9ff 0%, #5ee7df 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>PMO Agentic Copilot</div>
         <div style='font-size: 0.85rem; color: #a7c4bc;'>AI-First Project Management</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1052,8 +1052,8 @@ with st.sidebar:
             st.success(f"✅ Loaded {len(uploaded_files)} projects!")
 
 # Main content
-st.markdown('<h1 class="main-header">🚀 PMO CoPilot</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">AI-Powered Portfolio Intelligence • Multi-Agent Architecture • Real-time Insights</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">🚀 PMO Agentic Copilot</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">An AI-first PMO platform with 13 specialized agents that automate reporting, predict risks, and deliver executive insights in seconds.</p>', unsafe_allow_html=True)
 
 # Show active agent indicator
 if st.session_state.selected_agent != "auto":
@@ -1079,7 +1079,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
 
 # TAB 1: AI Assistant
 with tab1:
-    st.markdown("### 💬 Chat with PMO CoPilot")
+    st.markdown("### 💬 Chat with PMO Agentic Copilot")
     
     # Quick action buttons - 7 columns for handoff demo
     col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
@@ -1118,7 +1118,7 @@ with tab1:
                 st.markdown("""
                 <div style='text-align: center; padding: 2rem; color: #7a9e9f;'>
                     <div style='font-size: 3rem; margin-bottom: 1rem;'>🤖</div>
-                    <p style='font-size: 1.1rem; color: #a7c4bc;'>Welcome to PMO CoPilot!</p>
+                    <p style='font-size: 1.1rem; color: #a7c4bc;'>Welcome to PMO Agentic Copilot!</p>
                     <p style='font-size: 0.9rem;'>Click an agent in the sidebar or ask a question below.</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -2168,7 +2168,7 @@ with tab8:
 st.divider()
 st.markdown("""
 <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(44, 83, 100, 0.4) 0%, rgba(32, 58, 67, 0.3) 100%); border-radius: 1rem; margin-top: 2rem;'>
-    <p style='font-size: 1.2rem; color: #5ee7df; margin-bottom: 0.5rem;'>🚀 <strong>PMO CoPilot</strong></p>
+    <p style='font-size: 1.2rem; color: #5ee7df; margin-bottom: 0.5rem;'>🚀 <strong>PMO Agentic Copilot</strong></p>
     <p style='font-size: 0.95rem; color: #a7c4bc;'>AI-First Project Management • OpenAI Agents SDK • Multi-Agent Architecture</p>
     <div style='display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;'>
         <span class='agent-badge'>Status Reports</span>
