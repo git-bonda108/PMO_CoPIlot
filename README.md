@@ -1,274 +1,105 @@
-# 🚀 PMO Agentic Copilot
+# PMO Agentic Copilot
 
-**An AI-first PMO platform with 13 specialized agents that automate reporting, predict risks, and deliver executive insights in seconds.**
+A multi-agent project-portfolio management assistant: an orchestrator agent routes natural-language PMO queries to eleven specialist agents (status reporting, risk, escalation, EVM, scheduling, resources, milestones, forecasting, workflow), built on the OpenAI Agents SDK with a Streamlit front end.
 
-Built with OpenAI Agents SDK
+It is aimed at PMO leads and delivery managers who want status reports, Red/Amber/Green dashboards, Earned Value Management analysis, escalation packs, and steering-committee material generated from portfolio data on demand. The repository ships with a four-project mock portfolio and a fully offline demo mode, so it runs end to end without any API key.
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B.svg)](https://streamlit.io/)
-[![OpenAI Agents SDK](https://img.shields.io/badge/OpenAI_Agents-0.0.7+-412991.svg)](https://platform.openai.com/)
+## Architecture at a glance
 
----
+- **Orchestration pattern: triage router with a peer handoff mesh.** A front-door orchestrator agent (`pmo_copilot_agents.py`) routes each query to one of 11 specialist agents via OpenAI Agents SDK `handoff()`. Specialists are additionally wired to each other (3–5 handoffs each), so control can chain laterally — e.g. Risk Prediction → EVM Analyst → Escalation — without returning to the orchestrator. Execution is sequential: exactly one agent is active at a time, running a single-agent tool loop until it answers or hands off. Nothing runs in parallel.
+- **Framework and model:** OpenAI Agents SDK (`openai-agents`). No model is pinned in code; the SDK default is used. A second, LLM-free path (`demo_runner.py`) routes queries by keyword matching and calls the same tool functions directly — this is the default mode.
+- **Tools:** 14 read-only functions in `pmo_tools.py` (portfolio overview, project details, blockers, risks, EVM, sprints, issues, escalation report, schedule, resources, milestones, predictive analytics, workflow, ML predictions). The agents expose 14 `@function_tool` wrappers: 13 of these functions (all but ML predictions) plus a current-date helper.
+- **Memory / session state:** none on the agent side — each query is an independent `Runner.run()` with no conversation history. Streamlit `st.session_state` keeps chat history and the last report for display only.
+- **Retrieval:** none. Data comes from in-process Python dictionaries (`mock_jira_data.py`); LangChain/FAISS/Chroma appear in `requirements.txt` but are not used by any module.
+- **Analytics:** deterministic EVM math (`evm_calculator.py`) and five lazily trained regression/classification models (`ml_models.py`) with graceful fallbacks when scikit-learn or XGBoost are absent.
 
-## 📋 Overview
-
-PMO CoPilot is an intelligent multi-agent system designed for enterprise project portfolio management. It leverages the OpenAI Agents SDK for sophisticated AI-driven insights, automated reporting, and predictive analytics.
-
-### Key Features
-
-| Feature | Description |
-|---------|-------------|
-| 🤖 **13 AI Agents** | Specialized agents for status reporting, risk prediction, escalation, EVM analysis, and more |
-| 📊 **Multi-Agent Handoffs** | Agents intelligently delegate to specialists based on query context |
-| 📈 **ML Predictions** | XGBoost & Linear Regression models for cost, schedule, and risk forecasting |
-| 📉 **Advanced Visualizations** | Gantt charts, Resource Heatmaps, Burn-down charts |
-| 🚦 **RAG Dashboard** | Real-time Red/Amber/Green portfolio health monitoring |
-| 💰 **EVM Analytics** | Complete Earned Value Management with variance analysis |
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      ORCHESTRATOR AGENT                          │
-│         (Routes queries to appropriate specialist agents)        │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-    ┌──────────────────────┼──────────────────────┐
-    │                      │                      │
-    ▼                      ▼                      ▼
-┌─────────┐          ┌─────────┐          ┌─────────┐
-│ Status  │          │  Risk   │          │Escalation│
-│ Report  │          │Prediction│         │  Agent   │
-└─────────┘          └─────────┘          └─────────┘
-    │                      │                      │
-    ▼                      ▼                      ▼
-┌─────────┐          ┌─────────┐          ┌─────────┐
-│   RAG   │          │ SteerCo │          │   EVM   │
-│Reporter │          │  Prep   │          │ Analyst │
-└─────────┘          └─────────┘          └─────────┘
-    │                      │                      │
-    ▼                      ▼                      ▼
-┌─────────┐          ┌─────────┐          ┌─────────┐
-│Schedule │          │Resource │          │Milestone│
-│Optimizer│          │Allocation│         │Guardian │
-└─────────┘          └─────────┘          └─────────┘
-    │                      │                      │
-    ▼                      ▼                      ▼
-┌─────────┐          ┌─────────┐          ┌─────────┐
-│Predictive│         │Workflow │          │   ML    │
-│Analytics │         │Automation│         │Predictions│
-└─────────┘          └─────────┘          └─────────┘
+```mermaid
+flowchart TD
+    UI[Streamlit UI<br/>pmo_copilot_app.py] -->|Live AI mode| ORC[Orchestrator agent]
+    UI -->|Demo mode default| DR[Keyword router<br/>demo_runner.py]
+    ORC -->|handoff| SPEC[11 specialist agents<br/>cross-handoff mesh]
+    SPEC -->|function tools| TOOLS[pmo_tools.py]
+    DR --> TOOLS
+    TOOLS --> DATA[mock_jira_data.py]
+    TOOLS --> EVM[evm_calculator.py]
+    TOOLS --> ML[ml_models.py]
 ```
 
----
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full component map and data flow.
 
-## 🤖 AI Agents
-
-| Agent | Description | Key Outputs |
-|-------|-------------|-------------|
-| **Auto Orchestrator** | Routes queries to best specialist | Intelligent delegation |
-| **Status Report** | Generates weekly/monthly reports | Sprint progress, metrics, blockers |
-| **Risk Prediction** | Predicts delays & budget overruns | Risk assessment, mitigation plans |
-| **Escalation** | Auto-escalates critical issues | Stakeholder alerts, action items |
-| **RAG Reporter** | Red/Amber/Green dashboard | Portfolio health matrix |
-| **SteerCo Prep** | Executive summaries | Talking points, decisions |
-| **EVM Analyst** | Earned Value Management | CPI, SPI, variance analysis |
-| **Schedule Optimizer** | Timeline optimization | Critical path, dependencies |
-| **Resource Allocation** | Capacity analysis | Utilization matrix, reallocation |
-| **Milestone Guardian** | Milestone tracking | Predictions, at-risk alerts |
-| **Predictive Analytics** | ML-based forecasting | Probability analysis |
-| **ML Predictions** | XGBoost/Linear Regression | Cost, schedule, risk forecasts |
-| **Workflow Automation** | Bottleneck analysis | Automation opportunities |
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11 or higher
-- pip or uv package manager
-
-### Installation
+## Quickstart
 
 ```bash
-# Clone the repository
 git clone https://github.com/git-bonda108/PMO_CoPIlot.git
 cd PMO_CoPIlot
 
-# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate          # Windows: venv\Scripts\activate
 
-# Install dependencies
 pip install -r requirements.txt
+pip install scikit-learn xgboost  # optional: enables the trained ML models (not in requirements.txt)
+
+streamlit run pmo_copilot_app.py
 ```
 
-### Configuration
+Expected output:
 
-Create a `.env` file in the project root:
+```
+  You can now view your Streamlit app in your browser.
 
-```env
-# API Keys (optional - Demo mode works without them)
-OPENAI_API_KEY=your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-# Model Settings
-OPENAI_MODEL=gpt-4o
-ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+  Local URL: http://localhost:8501
 ```
 
-### Run the Application
+The app opens in Demo Mode (no keys needed). Click an agent in the sidebar or type a query such as `escalate DPLAT` or `rag dashboard`.
+
+Two console entry points also exist:
 
 ```bash
-# Using Streamlit directly
-streamlit run pmo_copilot_app.py
-
-# Or using Python module
-python -m streamlit run pmo_copilot_app.py
+python demo_runner.py           # interactive demo REPL, no API key
+python pmo_copilot_agents.py    # interactive session against the live agents (requires OPENAI_API_KEY)
 ```
 
-The app will open at `http://localhost:8501`
+## Configuration
 
----
+Environment variables are loaded from a `.env` file in the project root via `python-dotenv` (`.env` is gitignored).
 
-## 📁 Project Structure
+| Variable | Required | What it does | Where to get it |
+|----------|----------|--------------|-----------------|
+| `OPENAI_API_KEY` | No | Enables Live AI Mode. The app checks that the value starts with `sk-`; without it, everything runs in Demo Mode. | platform.openai.com |
+| `ANTHROPIC_API_KEY` | No | Read by the app (`pmo_copilot_app.py`) but not used by any current code path. | Not needed |
+
+No model-selection variable is read by the code; agents use the SDK's default model.
+
+## Modes
+
+| Mode | What runs | API key |
+|------|-----------|---------|
+| Demo Mode (default) | Keyword router in `demo_runner.py` calls tool functions directly; deterministic output | None |
+| Live AI Mode (sidebar toggle) | `Runner.run()` on the orchestrator agent; falls back to Demo Mode on any API error | `OPENAI_API_KEY` |
+
+## Repository layout
 
 ```
-PMO_CoPIlot/
-├── pmo_copilot_app.py          # Main Streamlit UI
-├── pmo_copilot_agents.py       # OpenAI Agents SDK implementation
-├── pmo_tools.py                # Agent tool functions
-├── demo_runner.py              # Demo mode (no API keys required)
-├── ml_models.py                # ML prediction models
-├── evm_calculator.py           # EVM calculations
-├── mock_jira_data.py           # Mock JIRA data
-├── requirements.txt            # Python dependencies
-├── .env                        # API keys (not in git)
-├── .gitignore                  # Git ignore rules
-├── README.md                   # This file
-├── PMO_COPILOT_FEATURES_WORKFLOW.md  # Features documentation
-├── PMO_COPILOT_TEST_CASES.md   # Test cases documentation
-└── *.xlsx                      # Project data exports
+pmo_copilot_app.py       Streamlit UI (8 tabs: assistant, portfolio, deep dive,
+                         risks, EVM, visualizations, ML predictions, reports)
+pmo_copilot_agents.py    Orchestrator + 11 specialist agents and their handoffs
+pmo_tools.py             14 tool functions shared by agents and demo mode
+demo_runner.py           Offline keyword router simulating the agent flow
+ml_models.py             5 predictive models (cost, schedule, risk, resources, burn rate)
+evm_calculator.py        Earned Value Management calculations and report formatting
+mock_jira_data.py        Four-project mock portfolio (ECOM, MAPP, DPLAT, SECU)
+requirements.txt         Python dependencies
+*.xlsx, *.pdf            Sample data exports and briefing documents
 ```
 
----
+## Documentation
 
-## 📊 Demo Mode vs Live AI Mode
+- [Architecture](docs/ARCHITECTURE.md) — component map, orchestration analysis, state, design trade-offs
+- [Evaluation](docs/EVALUATION.md) — what is and is not tested, known defects, proposed harness
+- [Hardening](docs/HARDENING.md) — current security posture and a staged path to production
+- [Features and workflows](PMO_COPILOT_FEATURES_WORKFLOW.md) — per-agent feature notes
+- [Manual test cases](PMO_COPILOT_TEST_CASES.md) — manual QA catalog (TC-001 … TC-020)
 
-| Mode | Description | API Keys Required |
-|------|-------------|-------------------|
-| **Demo Mode** | Pre-built responses, realistic mock data | No |
-| **Live AI Mode** | Real OpenAI API calls, dynamic responses | Yes |
+## License
 
-Toggle between modes using the sidebar switch.
-
----
-
-## 🎯 Use Cases
-
-### 1. Generate Status Report
-```
-Click "Status Report Agent" → Select project → View comprehensive report
-```
-
-### 2. Risk Analysis
-```
-Click "Risk Prediction Agent" → Get AI-predicted delays and mitigations
-```
-
-### 3. ML Predictions
-```
-Navigate to "ML Predictions" tab → Select project → View forecasts
-```
-
-### 4. SteerCo Package
-```
-Click "SteerCo Prep Agent" → Get executive summary and talking points
-```
-
-### 5. EVM Analysis
-```
-Navigate to "EVM Analytics" tab → View CPI, SPI, variance analysis
-```
-
----
-
-## 📈 ML Models
-
-| Model | Algorithm | Target | Features |
-|-------|-----------|--------|----------|
-| **Cost Forecaster** | XGBoost | Final project cost | CPI, SPI, % Complete, Risk Score |
-| **Schedule Predictor** | Linear Regression | Delay days | SPI, Velocity, Blockers |
-| **Risk Classifier** | XGBoost | HIGH/MEDIUM/LOW | CPI, SPI, Blockers, Velocity Trend |
-| **Resource Forecaster** | Linear Regression | FTEs needed | Completion %, Team Size, Velocity |
-| **Burn Rate Predictor** | XGBoost | Monthly burn rate | Cost, EAC, VAC, TCPI |
-
----
-
-## 📋 EVM Metrics
-
-| Metric | Formula | Description |
-|--------|---------|-------------|
-| **EV** | Budget × % Complete | Earned Value |
-| **PV** | Planned budget to date | Planned Value |
-| **AC** | Actual spending | Actual Cost |
-| **CPI** | EV / AC | Cost Performance Index |
-| **SPI** | EV / PV | Schedule Performance Index |
-| **CV** | EV - AC | Cost Variance |
-| **SV** | EV - PV | Schedule Variance |
-| **EAC** | BAC / CPI | Estimate at Completion |
-| **VAC** | BAC - EAC | Variance at Completion |
-| **TCPI** | (BAC-EV)/(BAC-AC) | To Complete Performance Index |
-
----
-
-## 🛠️ Technology Stack
-
-- **Frontend:** Streamlit
-- **AI Framework:** OpenAI Agents SDK
-- **ML:** scikit-learn, XGBoost
-- **Visualization:** Plotly
-- **Data Processing:** Pandas, NumPy
-
----
-
-## 📄 Documentation
-
-- [Features & Workflow Guide](PMO_COPILOT_FEATURES_WORKFLOW.md)
-- [Test Cases](PMO_COPILOT_TEST_CASES.md)
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📜 License
-
-This project is proprietary software developed for IgniteTech.
-
----
-
-## 👤 Author
-
-**PMO CoPilot Development Team**
-
-- Built for IgniteTech Interview Demo
-- January 2026
-
----
-
-## 🙏 Acknowledgments
-
-- OpenAI for the Agents SDK
-- Streamlit for the web framework
-- Plotly for visualizations
+No license file is present; all rights reserved by default.

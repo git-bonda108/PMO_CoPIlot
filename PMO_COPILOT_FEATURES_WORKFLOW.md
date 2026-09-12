@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-**PMO CoPilot** is an AI-First Project Management Assistant built for IgniteTech, leveraging the OpenAI Agents SDK for intelligent multi-agent orchestration. It provides real-time project insights, predictive analytics, and automated reporting capabilities.
+**PMO CoPilot** is an AI-First Project Management Assistant for enterprise PMO teams, leveraging the OpenAI Agents SDK for intelligent multi-agent orchestration. It provides real-time project insights, predictive analytics, and automated reporting capabilities.
 
 ---
 
@@ -425,4 +425,3 @@ When Live AI Mode is OFF, the system uses demo_runner.py which provides:
 
 *Document Version: 1.0*
 *Last Updated: January 2026*
-*Author: PMO CoPilot Development Team*
