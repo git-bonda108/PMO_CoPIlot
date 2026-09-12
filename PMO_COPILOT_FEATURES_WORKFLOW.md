@@ -364,7 +364,7 @@ UI refreshes with new project data
 ## 📁 File Structure
 
 ```
-PMO_CoPIlot/
+pmo-copilot/
 ├── pmo_copilot_app.py      # Main Streamlit UI
 ├── pmo_copilot_agents.py   # OpenAI Agents SDK implementation
 ├── pmo_tools.py            # Agent tool functions

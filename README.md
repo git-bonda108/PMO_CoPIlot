@@ -30,8 +30,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full component map and 
 ## Quickstart
 
 ```bash
-git clone https://github.com/git-bonda108/PMO_CoPIlot.git
-cd PMO_CoPIlot
+git clone https://github.com/git-bonda108/pmo-copilot.git
+cd pmo-copilot
 
 python -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
