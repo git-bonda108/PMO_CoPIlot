@@ -2176,6 +2176,6 @@ st.markdown("""
         <span class='agent-badge'>EVM Analytics</span>
         <span class='agent-badge'>SteerCo Prep</span>
     </div>
-    <p style='font-size: 0.8rem; color: #7a9e9f; margin-top: 1rem;'>Built for IgniteTech Interview Demo</p>
+    <p style='font-size: 0.8rem; color: #7a9e9f; margin-top: 1rem;'>PMO CoPilot — Multi-Agent Project Intelligence</p>
 </div>
 """, unsafe_allow_html=True)
