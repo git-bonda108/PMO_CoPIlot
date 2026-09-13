@@ -1053,7 +1053,7 @@ with st.sidebar:
 
 # Main content
 st.markdown('<h1 class="main-header">🚀 PMO Agentic Copilot</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">An AI-first PMO platform with 13 specialized agents that automate reporting, predict risks, and deliver executive insights in seconds.</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">An AI-first PMO platform with 12 specialized agents that automate reporting, predict risks, and deliver executive insights in seconds.</p>', unsafe_allow_html=True)
 
 # Show active agent indicator
 if st.session_state.selected_agent != "auto":
@@ -1684,7 +1684,7 @@ with tab6:
             
             # Show table
             st.dataframe(
-                total_by_resource.style.applymap(
+                total_by_resource.style.map(
                     lambda x: 'color: #ef4444' if '🔴' in str(x) else ('color: #10b981' if '🟢' in str(x) else 'color: #f59e0b'),
                     subset=['Status']
                 ),
